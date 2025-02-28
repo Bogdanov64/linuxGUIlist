@@ -1,4 +1,4 @@
 # linuxGUIlist
-cd linuxGUIlist
-chmod u+x ./linuxGUIlist.sh
-./linuxGUIlist.sh
+<li>cd linuxGUIlist<li>
+<li>chmod u+x ./linuxGUIlist.sh<li>
+<li>./linuxGUIlist.sh<li>
