@@ -1,30 +1,54 @@
 #!/bin/bash
 
-options=("xfce4" "lxqt" "fvwm" "Quit")
+# Define the options
+options=("xfce4" "fvwm" "openbox" "fluxbox")
 
-select opt in "${options[@]}"; do
-    case $opt in
-        "xfce4")
-            echo "You selected xfce4"
-export DISPLAY=:0
-xfce4-session
-            ;;
-        "lxqt")
-            echo "You selected lxqt"
-export DISPLAY=:0
-lxqt-session
-            ;;
-        "fvwm")
-            echo "You selected fvwm"
-export DISPLAY=:0
-fvwm
-            ;;
-        "Quit")
-            echo "Exiting..."
-            break
-            ;;
-        *)
-            echo "Invalid option"
-            ;;
-    esac
-done
+# Create a dialog menu
+selected=$(dialog --title "Select a Window Manager" \
+                  --menu "Choose one of the following options:" \
+                  15 50 4 \
+                  "${options[@]}" \
+                  3>&1 1>&2 2>&3)
+
+# Check if the user pressed Cancel
+exit_status=$?
+if [ $exit_status != 0 ]; then
+  echo "User canceled the selection."
+  exit 1
+fi
+
+# Function to check if a package is installed
+is_installed() {
+  dpkg -l | grep -q "^ii  $1"
+}
+
+# Determine the command based on the selected option
+case $selected in
+  "xfce4")
+    if ! is_installed "xfce4"; then
+      echo "xfce4 is not installed. Installing..."
+      apt install -y xfce4
+    fi
+    command="dbus-launch --exit-with-session xfce4-session"
+    ;;
+  "fvwm")
+    if ! is_installed "fvwm"; then
+      echo "fvwm is not installed. Installing..."
+      apt install -y fvwm
+    fi
+    command="dbus-launch --exit-with-session fvwm"
+    ;;
+  "openbox")
+    command="dbus-launch --exit-with-session openbox"
+    ;;
+  "fluxbox")
+    command="dbus-launch --exit-with-session fluxbox"
+    ;;
+  *) 
+    echo "Invalid option"
+    exit 1
+    ;;
+esac
+
+# Execute the selected command with 'termux-x11'
+termux-x11 :1 -xstartup "$command"
